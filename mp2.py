@@ -52,20 +52,22 @@ Main function
 """
 def main(args):
     train_set, train_labels, dev_set, dev_labels = nb.load_data(args.training_dir,args.development_dir,args.stemming,args.lowercase)
-    best_accuracy, best_laplace, best_pos_prior = 0, 0, 0
+    best_accuracy, best_laplace, best_bigram_laplace, best_pos_prior, best_lambda = 0, 0, 0, 0, 0
 
     for laplace in [0.1, 0.2 ,0.3 ,0.4 ,0.5 ,0.6 ,0.7 ,0.8, 0.9, 1, 1.1 ,1.2 ,1.3 ,1.4 ,1.5 ,1.6 ,1.7 ,1.8, 1.9, 2]:
-        for pos_prior in [0.1 ,0.2 ,0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-            predicted_labels_uni = nb.naiveBayes(dev_set, train_set, train_labels, laplace, pos_prior)
-            predicted_labels_bi = nb.bigramBayes(dev_set, train_set, train_labels, unigram_laplace, bigram_laplace, bigram_lambda, pos_prior, silently)
-            for lamb in range(0, 1, 0.05):
-                predicted_labels = (1 - lamb)*math.log10(predicted_labels_uni) + lamb*math.log10(predicted_labels_bi)
-            
-                accuracy, false_positive, false_negative, true_positive, true_negative = compute_accuracies(predicted_labels,dev_labels)
-                if accuracy > best_accuracy:
-                    best_accuracy, best_laplace, best_pos_prior = accuracy, laplace, pos_prior
-            nn = len(dev_labels)
-            print_stats(accuracy, false_positive, false_negative, true_positive, true_negative, nn)
+        for bigram_laplace in [0.1, 0.2 ,0.3 ,0.4 ,0.5 ,0.6 ,0.7 ,0.8, 0.9, 1, 1.1 ,1.2 ,1.3 ,1.4 ,1.5 ,1.6 ,1.7 ,1.8, 1.9, 2]:
+            for pos_prior in [0.1 ,0.2 ,0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                for lamb in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                    predicted_labels = nb.bigramBayes(dev_set, train_set, train_labels, 
+                                                            laplace, bigram_laplace, lamb, pos_prior)
+                
+                    accuracy, false_positive, false_negative, true_positive, true_negative = compute_accuracies(predicted_labels,dev_labels)
+                    print("accuracy = ", accuracy)
+                    if accuracy > best_accuracy:
+                        best_accuracy, best_laplace, best_bigram_laplace, best_pos_prior, best_lambda = accuracy, laplace, bigram_laplace, pos_prior, lamb
+                nn = len(dev_labels)
+                print_stats(accuracy, false_positive, false_negative, true_positive, true_negative, nn)
+    print("best accuracy:", best_accuracy, ", happens at (laplace, bigram_laplace, pos_prior, lambda) =", best_laplace, best_bigram_laplace, best_pos_prior, best_lambda)
 
 
     
