@@ -47,13 +47,65 @@ def load_data(trainingdir, testdir, stemming=False, lowercase=False, silently=Fa
     train_set, train_labels, dev_set, dev_labels = reader.load_dataset(trainingdir,testdir,stemming,lowercase,silently)
     return train_set, train_labels, dev_set, dev_labels
 
+# Model description
+# negative = 0, positive = 1 
+# P(word|Type = negative) = counts of word when Type = negative / total negative words counts
+#                                     = train_P_cnts[0] / train_total_word_cnts[0]
+# P(word|Type = positive) = counts of word when Type = positive / total positive words counts
+#                                     = train_P_cnts[1] / train_total_word_cnts[1]
+# train_P_cnts[0]: counts of word when Type = negative
+# train_P_cnts[1]: counts of word when Type = positive
+# train_total_word_cnts[0]: counts of total negative words
+# train_total_word_cnts[1]: counts of total positive words
 
+def unigramBayesModel(train_set, train_labels)
+    train_P_cnts = [defaultdict(int), defaultdict(int)]
+    train_data_length = len(train_set)
+    train_total_word_cnts = [0, 0]
+    train_words_set = set()
+ 
+    for i in range(train_data_length):
+        for word in train_set[i]:
+            train_P_cnts[train_labels[i]][word] += 1
+            train_words_set.add(word)
+        train_total_word_cnts[train_labels[i]] += len(train_set[i])
+    return train_P_cnts, train_total_word_cnts, len(train_words_set)
+
+def bigramBayesModel(train_set, train_labels)
+    train_P_cnts = [defaultdict(int), defaultdict(int)]
+    train_data_length = len(train_set)
+    train_total_word_cnts = [0, 0]
+    train_words_set = set()
+ 
+    for i in range(train_data_length):
+        for j in range(len(train_set[i]) - 1):
+            train_P_cnts[train_labels[i]][word] += 1
+            train_words_set.add(word)
+        train_total_word_cnts[train_labels[i]] += len(train_set[i])
+    return train_P_cnts, train_total_word_cnts, len(train_words_set)
+
+    
 """
 Main function for training and predicting with the bigram mixture model.
     You can modify the default values for the Laplace smoothing parameters, model-mixture lambda parameter, and the prior for the positive label.
     Notice that we may pass in specific values for these parameters during our testing.
 """
 def bigramBayes(dev_set, train_set, train_labels, unigram_laplace=1.0, bigram_laplace=1.0, bigram_lambda=1.0, pos_prior=0.5, silently=False):
+    
+
+
+
+
+
+
+"""
+Main function for training and predicting with naive bayes.
+    You can modify the default values for the Laplace smoothing parameter and the prior for the positive label.
+    Notice that we may pass in specific values for these parameters during our testing.
+"""
+def naiveBayes(dev_set, train_set, train_labels, laplace=1.2, pos_prior=0.9, silently=False):
+    print_values(laplace,pos_prior)
+
     train_P_cnts = [defaultdict(int), defaultdict(int)]
     train_data_length = len(train_set)
     train_total_word_cnts = [0, 0]
@@ -81,15 +133,13 @@ def bigramBayes(dev_set, train_set, train_labels, unigram_laplace=1.0, bigram_la
         log_P[0], log_P[1] = math.log(1 - pos_prior), math.log(pos_prior)
         for label in [0, 1]:
             for word in doc:
-                log_P[label] += (1 - bigram_lambda)*(math.log(train_P_cnts[label][word] + unigram_laplace) - math.log(train_total_word_cnts[label] + unigram_laplace * len(train_words_set) + 1)) 
-                + bigram_lambda*(math.log(train_P_cnts[label][word] + bigram_laplace) - math.log(train_total_word_cnts[label] + bigram_laplace * len(train_words_set) + 1))
+                log_P[label] += math.log(train_P_cnts[label][word] + laplace) - \
+                                math.log(train_total_word_cnts[label] + laplace * len(train_words_set) + 1)
         if log_P[0] >= log_P[1]:
             yhats.append(0)
         else:
             yhats.append(1)
 
     return yhats
-
-
 
 
