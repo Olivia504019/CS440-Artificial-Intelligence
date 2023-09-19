@@ -58,7 +58,7 @@ def load_data(trainingdir, testdir, stemming=True, lowercase=True, silently=Fals
 # train_total_word_cnts[0]: counts of total negative words
 # train_total_word_cnts[1]: counts of total positive words
 
-def unigramBayesModel(dev_set, train_set, train_labels, laplace=1.2, pos_prior=0.9):
+def unigramBayesModel(dev_set, train_set, train_labels, laplace, pos_prior):
     train_P_cnts = [defaultdict(int), defaultdict(int)]
     train_data_length = len(train_set)
     train_total_word_cnts = [0, 0]
@@ -80,7 +80,7 @@ def unigramBayesModel(dev_set, train_set, train_labels, laplace=1.2, pos_prior=0
                                     math.log(train_total_word_cnts[label] + laplace * (len(train_words_set) + 1))
     return log_P
 
-def bigramBayesModel(dev_set, train_set, train_labels, laplace=1.2, pos_prior=0.9):
+def bigramBayesModel(dev_set, train_set, train_labels, laplace, pos_prior):
     train_P_cnts = [defaultdict(int), defaultdict(int)]
     train_data_length = len(train_set)
     train_total_word_cnts = [0, 0]
@@ -110,7 +110,7 @@ Main function for training and predicting with the bigram mixture model.
     You can modify the default values for the Laplace smoothing parameters, model-mixture lambda parameter, and the prior for the positive label.
     Notice that we may pass in specific values for these parameters during our testing.
 """
-def bigramBayes(dev_set, train_set, train_labels, unigram_laplace=1.0, bigram_laplace=1.0, bigram_lambda=1.0, pos_prior=0.5, silently=False):
+def bigramBayes(dev_set, train_set, train_labels, unigram_laplace=0.1, bigram_laplace=0.9, bigram_lambda=0.6, pos_prior=0.8, silently=False):
     print_values_bigram(unigram_laplace,bigram_laplace,bigram_lambda,pos_prior)
 
     yhats = []

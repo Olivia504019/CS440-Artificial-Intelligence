@@ -54,10 +54,10 @@ def main(args):
     train_set, train_labels, dev_set, dev_labels = nb.load_data(args.training_dir,args.development_dir,args.stemming,args.lowercase)
     best_accuracy, best_laplace, best_bigram_laplace, best_pos_prior, best_lambda = 0, 0, 0, 0, 0
 
-    for laplace in [0.1, 0.2 ,0.3 ,0.4 ,0.5 ,0.6 ,0.7 ,0.8, 0.9, 1, 1.1 ,1.2 ,1.3 ,1.4 ,1.5 ,1.6 ,1.7 ,1.8, 1.9, 2]:
-        for bigram_laplace in [0.1, 0.2 ,0.3 ,0.4 ,0.5 ,0.6 ,0.7 ,0.8, 0.9, 1, 1.1 ,1.2 ,1.3 ,1.4 ,1.5 ,1.6 ,1.7 ,1.8, 1.9, 2]:
-            for pos_prior in [0.1 ,0.2 ,0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
-                for lamb in [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+    for laplace in [0.1 ,0.3 ,0.5 ,0.7, 0.9, 1.1 , 1.3 , 1.5 ,1.7 , 1.9]:
+        for bigram_laplace in [0.1 ,0.3 ,0.5 ,0.7, 0.9, 1.1 , 1.3 , 1.5 ,1.7 , 1.9]:
+            for pos_prior in [0.2 , 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]:
+                for lamb in [0.1, 0.3, 0.4, 0.5, 0.6, 0.7]:
                     predicted_labels = nb.bigramBayes(dev_set, train_set, train_labels, 
                                                             laplace, bigram_laplace, lamb, pos_prior)
                 
