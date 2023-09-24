@@ -91,6 +91,9 @@ class WordLadderState(AbstractState):
                 c = chr(c_idx) # convert index to character
                 # Replace the character at word_idx with c
                 potential_nbr = prefix + c + suffix
+                # DO NOT let self become neighbor
+                if potential_nbr == self.state:
+                    continue
                 # If the resulting word is a valid english word, add it as a neighbor
                 if is_english_word(potential_nbr):
                     # NOTE: the distance from start of a neighboring state is 1 more than the distance from current state
@@ -117,7 +120,9 @@ class WordLadderState(AbstractState):
     def __lt__(self, other):    
         # You should return True if the current state has a lower g + h value than "other"
         # If they have the same value then you should use tiebreak_idx to decide which is smaller
-        pass
+        if self.dist_from_start + self.compute_heuristic() != other.dist_from_start + other.compute_heuristic():
+            return self.dist_from_start + self.compute_heuristic() < other.dist_from_start + other.compute_heuristic()
+        return super().__lt__(other)
     
     # str and repr just make output more readable when you print out states
     def __str__(self):
@@ -130,7 +135,7 @@ class WordLadderState(AbstractState):
 # TODO(IV): implement this method (also need it for parts V and VI)
 # Manhattan distance between two points (a=(a1,a2), b=(b1,b2))
 def manhattan(a, b):
-    return 0
+    return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
 class EightPuzzleState(AbstractState):
     def __init__(self, state, goal, dist_from_start, use_heuristic, zero_loc):
@@ -143,6 +148,14 @@ class EightPuzzleState(AbstractState):
         super().__init__(state, goal, dist_from_start, use_heuristic)
         self.zero_loc = zero_loc
     
+    def copy(self):
+        state = []
+        for i in range(len(self.state)):
+            state.append([])
+            for j in range(len(self.state[i])):
+                state[i].append(self.state[j])
+        return state
+
     # TODO(IV): implement this method
     def get_neighbors(self):
         '''
@@ -152,28 +165,38 @@ class EightPuzzleState(AbstractState):
         # NOTE: There are *up to 4* possible neighbors and the order you add them matters for tiebreaking
         #   Please add them in the following order: [below, left, above, right], where for example "below" 
         #   corresponds to moving the empty tile down (moving the tile below the empty tile up)
-        
+        for dy, dx in [(-1, 0), (0, -1), (1, 0), (0, 1)]:
+            if self.zero_loc[0] + dx > 2 or self.zero_loc[0] + dx < 0 or \
+                self.zero_loc[1] + dy > 2 or self.zero_loc[1] + dy < 0:
+                continue
+            new_state = self.state.copy()
+            new_zero_loc = [self.zero_loc[0] + dx, self.zero_loc[1] + dy]
+            new_state[self.zero_loc[0]][self.zero_loc[1]] = new_state[new_zero_loc[0]][new_zero_loc[1]]
+            new_state[new_zero_loc[0]][new_zero_loc[1]] = 0
+            nbr_states.append(EightPuzzleState(new_state, self.goal, new_zero_loc))
         return nbr_states
 
     # Checks if goal has been reached
     def is_goal(self):
         # In python "==" performs deep list equality checking, so this works as desired
         return self.state == self.goal
-    
+
     # Can't hash a list, so first flatten the 2d array and then turn into tuple
     def __hash__(self):
         return hash(tuple([item for sublist in self.state for item in sublist]))
     def __eq__(self, other):
         return self.state == other.state
-    
+
     # TODO(IV): implement this method
     def compute_heuristic(self):
         total = 0
         # NOTE: There is more than one possible heuristic, 
         #       please implement the Manhattan heuristic, as described in the MP instructions
-        
+        for i in range(len(self.state)):
+            for j in range(len(self.state[i])):
+                total += manhattan()
         return total
-    
+
     # TODO(IV): implement this method
     # Hint: it should be identical to what you wrote in WordLadder.__lt__(self, other)
     def __lt__(self, other):
