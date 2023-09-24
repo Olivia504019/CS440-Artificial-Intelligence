@@ -147,14 +147,6 @@ class EightPuzzleState(AbstractState):
         # NOTE: AbstractState constructor does not take zero_loc
         super().__init__(state, goal, dist_from_start, use_heuristic)
         self.zero_loc = zero_loc
-    
-    def copy(self):
-        state = []
-        for i in range(len(self.state)):
-            state.append([])
-            for j in range(len(self.state[i])):
-                state[i].append(self.state[j])
-        return state
 
     # TODO(IV): implement this method
     def get_neighbors(self):
@@ -169,11 +161,16 @@ class EightPuzzleState(AbstractState):
             if self.zero_loc[0] + dx > 2 or self.zero_loc[0] + dx < 0 or \
                 self.zero_loc[1] + dy > 2 or self.zero_loc[1] + dy < 0:
                 continue
-            new_state = self.state.copy()
+            new_state = []
+            for i in range(len(self.state)):
+                new_state.append([])
+                for j in range(len(self.state[i])):
+                    new_state[i].append(self.state[i][j])
             new_zero_loc = [self.zero_loc[0] + dx, self.zero_loc[1] + dy]
-            new_state[self.zero_loc[0]][self.zero_loc[1]] = new_state[new_zero_loc[0]][new_zero_loc[1]]
-            new_state[new_zero_loc[0]][new_zero_loc[1]] = 0
-            nbr_states.append(EightPuzzleState(new_state, self.goal, new_zero_loc))
+            new_state[self.zero_loc[0]][self.zero_loc[1]], new_state[new_zero_loc[0]][new_zero_loc[1]] = \
+                new_state[new_zero_loc[0]][new_zero_loc[1]], new_state[self.zero_loc[0]][self.zero_loc[1]]
+            nbr_states.append(EightPuzzleState(new_state, self.goal, \
+                    self.dist_from_start + 1, self.use_heuristic, new_zero_loc))
         return nbr_states
 
     # Checks if goal has been reached
@@ -194,13 +191,15 @@ class EightPuzzleState(AbstractState):
         #       please implement the Manhattan heuristic, as described in the MP instructions
         for i in range(len(self.state)):
             for j in range(len(self.state[i])):
-                total += manhattan()
+                total += manhattan((i, j), (self.state[i][j] // 3, self.state[i][j] % 3))
         return total
 
     # TODO(IV): implement this method
     # Hint: it should be identical to what you wrote in WordLadder.__lt__(self, other)
     def __lt__(self, other):
-        pass
+        if self.dist_from_start + self.compute_heuristic() != other.dist_from_start + other.compute_heuristic():
+            return self.dist_from_start + self.compute_heuristic() < other.dist_from_start + other.compute_heuristic()
+        return super().__lt__(other)
     
     # str and repr just make output more readable when you print out states
     def __str__(self):

@@ -35,7 +35,6 @@ def best_first_search(starting_state):
     #   - check whether you've finished the search by calling state.is_goal()
     #       - then call backtrack(visited_states, state)...
     # Your code here ---------------
-
     while len(frontier) > 0:
         now_state = heapq.heappop(frontier)
         if now_state.is_goal():
@@ -58,7 +57,7 @@ def backtrack(visited_states, goal_state):
     # Your code here ---------------
     now_state = goal_state
     while True:
-        path.append(now_state)
+        path = [now_state] + path
         if visited_states[now_state][0]:
             now_state = visited_states[now_state][0]
         else:
