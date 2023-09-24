@@ -191,6 +191,8 @@ class EightPuzzleState(AbstractState):
         #       please implement the Manhattan heuristic, as described in the MP instructions
         for i in range(len(self.state)):
             for j in range(len(self.state[i])):
+                if self.state[i][j] == 0:
+                    continue
                 total += manhattan((i, j), (self.state[i][j] // 3, self.state[i][j] % 3))
         return total
 
